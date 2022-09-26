@@ -20,7 +20,11 @@ app.post('/files', upload.array('test'), async (req, res) => {
   const archive = archiver('zip', {
     zlib: { level: 9 },
   })
-  const output = fs.createWriteStream('newsletter.zip')
+
+  const upload = s3.upload({
+    Bucket: process.env.BUCKET,
+    key: 'test',
+  })
 
   output.on('close', function () {
     console.log(archive.pointer() + ' total bytes')
@@ -42,7 +46,7 @@ app.post('/files', upload.array('test'), async (req, res) => {
     throw err
   })
 
-  archive.pipe(output)
+  archive.pipe(upload)
 
   try {
     for await (let file of req.files) {
@@ -52,16 +56,14 @@ app.post('/files', upload.array('test'), async (req, res) => {
     console.error(error)
   }
 
-  archive
-    .finalize()
-    .then(() => {
-      s3.putObject({
-        Body: output,
-        Bucket: process.env.BUCKET,
-        Key: 'test',
-      }).promise()
-    })
-    .catch(console.log)
+  archive.finalize()
+  // .then(() => {
+  //   s3.putObject({
+  //     Body: output,
+  //     Bucket: process.env.BUCKET,
+  //     Key: 'test',
+  //   }).promise()
+  // })
 
   res.set('Content-type', 'text/plain')
   res.send('ok').end()
