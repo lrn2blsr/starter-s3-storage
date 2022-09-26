@@ -21,7 +21,7 @@ app.post('/files', upload.array('test'), async (req, res) => {
     zlib: { level: 9 },
   })
   const output = fs.createWriteStream(
-    path.join(__dirname, files, `${Date.now()}.zip`)
+    path.join(__dirname, 'files', `${Date.now()}.zip`)
   )
 
   output.on('close', function () {
