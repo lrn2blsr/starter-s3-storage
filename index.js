@@ -20,9 +20,7 @@ app.post('/files', upload.array('test'), async (req, res) => {
   const archive = archiver('zip', {
     zlib: { level: 9 },
   })
-  const output = fs.createWriteStream(
-    path.join(__dirname, 'files', `${Date.now()}.zip`)
-  )
+  const output = fs.createWriteStream('newsletter.zip')
 
   output.on('close', function () {
     console.log(archive.pointer() + ' total bytes')
