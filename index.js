@@ -1,23 +1,90 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
-const AWS = require("aws-sdk");
+const AWS = require('aws-sdk')
+
 const s3 = new AWS.S3()
-const bodyParser = require('body-parser');
+
+const bodyParser = require('body-parser')
+
+const multer = require('multer')
+const upload = multer()
+
+const archiver = require('archiver')
+const fs = require('fs')
+const path = require('path')
 
 app.use(bodyParser.json())
 
-// curl -i https://some-app.cyclic.app/myFile.txt
-app.get('*', async (req,res) => {
-  let filename = req.path.slice(1)
+app.post('/files', upload.array('test'), async (req, res) => {
+  const archive = archiver('zip', {
+    zlib: { level: 9 },
+  })
+  const output = fs.createWriteStream(
+    path.join(__dirname, files, `${Date.now()}.zip`)
+  )
+
+  output.on('close', function () {
+    console.log(archive.pointer() + ' total bytes')
+    console.log(
+      'archiver has been finalized and the output file descriptor has closed.'
+    )
+  })
+
+  archive.on('warning', function (err) {
+    if (err.code === 'ENOENT') {
+      console.log('warning')
+    } else {
+      // throw error
+      throw err
+    }
+  })
+
+  archive.on('error', function (err) {
+    throw err
+  })
+
+  archive.pipe(output)
 
   try {
-    let s3File = await s3.getObject({
-      Bucket: process.env.BUCKET,
-      Key: filename,
-    }).promise()
+    for await (let file of req.files) {
+      archive.append(file.buffer, { name: `${file.originalname}` })
+    }
+  } catch (error) {
+    console.error(error)
+  }
 
-    res.set('Content-type', s3File.ContentType)
-    res.send(s3File.Body.toString()).end()
+  archive
+    .finalize()
+    .then(() => {
+      s3.putObject({
+        Body: output,
+        Bucket: process.env.BUCKET,
+        Key: 'test',
+      }).promise()
+    })
+    .catch(console.log)
+
+  res.set('Content-type', 'text/plain')
+  res.send('ok').end()
+})
+
+// ***************************************
+
+app.get('/files', async (req, res) => {
+  // let filename = req.path.slice(1)
+
+  try {
+    let s3File = await s3
+      .getObject({
+        Bucket: process.env.BUCKET,
+        Key: 'test',
+      })
+      .promise()
+
+    res.attachment('newsletter.zip')
+    const fileStream = fs.createReadStream(s3File.Body)
+    fileStream.pipe(res)
   } catch (error) {
     if (error.code === 'NoSuchKey') {
       console.log(`No such key ${filename}`)
@@ -29,48 +96,25 @@ app.get('*', async (req,res) => {
   }
 })
 
-
-// curl -i -XPUT --data '{"k1":"value 1", "k2": "value 2"}' -H 'Content-type: application/json' https://some-app.cyclic.app/myFile.txt
-app.put('*', async (req,res) => {
+app.delete('*', async (req, res) => {
   let filename = req.path.slice(1)
 
-  console.log(typeof req.body)
-
-  await s3.putObject({
-    Body: JSON.stringify(req.body),
-    Bucket: process.env.BUCKET,
-    Key: filename,
-  }).promise()
+  await s3
+    .deleteObject({
+      Bucket: process.env.BUCKET,
+      Key: filename,
+    })
+    .promise()
 
   res.set('Content-type', 'text/plain')
   res.send('ok').end()
 })
 
-// curl -i -XDELETE https://some-app.cyclic.app/myFile.txt
-app.delete('*', async (req,res) => {
-  let filename = req.path.slice(1)
-
-  await s3.deleteObject({
-    Bucket: process.env.BUCKET,
-    Key: filename,
-  }).promise()
-
-  res.set('Content-type', 'text/plain')
-  res.send('ok').end()
-})
-
-// /////////////////////////////////////////////////////////////////////////////
-// Catch all handler for all other request.
-app.use('*', (req,res) => {
+app.use('*', (req, res) => {
   res.sendStatus(404).end()
 })
 
-// /////////////////////////////////////////////////////////////////////////////
-// Start the server
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 8080
 app.listen(port, () => {
   console.log(`index.js listening at http://localhost:${port}`)
 })
-
-
-
