@@ -23,7 +23,7 @@ app.post('/files', upload.array('test'), async (req, res) => {
 
   const upload = s3.upload({
     Bucket: process.env.BUCKET,
-    key: 'test',
+    Key: 'test',
   })
 
   output.on('close', function () {
