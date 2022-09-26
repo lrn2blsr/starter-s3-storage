@@ -87,7 +87,7 @@ app.get('/files', async (req, res) => {
     fileStream.pipe(res)
   } catch (error) {
     if (error.code === 'NoSuchKey') {
-      console.log(`No such key ${filename}`)
+      console.log(`No such key`)
       res.sendStatus(404).end()
     } else {
       console.log(error)
