@@ -8,9 +8,7 @@ export async function archiveFiles(files: Express.Multer.File[]) {
     zlib: { level: 9 },
   })
 
-  const output = fs.createWriteStream(
-    path.join(__dirname, 'files', 'newsletter.zip')
-  )
+  const output = fs.createWriteStream(path.join(__dirname, 'newsletter.zip'))
 
   output.on('close', function () {
     console.log(archive.pointer() + ' total bytes')
