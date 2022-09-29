@@ -12,7 +12,6 @@ import { uploadZipToS3 } from './uploadZipToS3'
 
 import { handleDownload } from './handleDownload'
 import path from 'path'
-import { existsSync, mkdirSync } from 'node:fs'
 
 // const staticFiles = path.join(__dirname, '..', 'build', 'static')
 const staticFiles = path.join(__dirname, 'static')
@@ -23,12 +22,6 @@ app.use(express.static(staticFiles))
 app.get('/', (req, res) => {
   res.sendFile(path.resolve(staticFiles, 'index.html'))
 })
-
-const folderName = path.join(__dirname, 'files')
-if (!existsSync(folderName)) {
-  mkdirSync(folderName)
-  console.log(`Folder ${folderName} created`)
-}
 
 app.post('/files', upload.array('newsletter'), async (req, res) => {
   if (!req.files) res.status(400).json({ msg: 'No files uploaded' })

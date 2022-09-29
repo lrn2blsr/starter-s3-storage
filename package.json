@@ -2,7 +2,7 @@
   "name": "casual-file-sender",
   "version": "1.0.0",
   "description": "",
-  "main": "build/index.js",
+  "main": "build/server.js",
   "scripts": {
     "start:dev": "nodemon",
     "build": "tsc",
