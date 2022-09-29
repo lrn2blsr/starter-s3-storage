@@ -16,9 +16,6 @@ export async function handleDownload(req: Request, res: Response) {
 
     const stream = PassThrough.from(s3File.Body!)
     res.attachment('newsletter.zip')
-    // const fileStream = fs.createReadStream(
-    //   path.join(__dirname, 'files', 'newsletter.zip')
-    // )
     stream.pipe(res)
   } catch (error) {
     if ((error as _Error).Code === 'NoSuchKey') {

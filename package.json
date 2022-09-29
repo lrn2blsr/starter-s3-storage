@@ -5,7 +5,9 @@
   "main": "build/server.js",
   "scripts": {
     "start:dev": "nodemon",
-    "build": "tsc",
+    "clean": "rimraf build/",
+    "copy-files": "copyfiles -u 1 src/**/*.html src/**/*.css src/**/*.png build/",
+    "build": "npm run clean && tsc && npm run copy-files",
     "start": "node build/server.js"
   },
   "keywords": [],
@@ -24,6 +26,7 @@
     "@types/express": "^4.17.14",
     "@types/multer": "^1.4.7",
     "@types/node": "^18.7.23",
+    "copyfiles": "^2.4.1",
     "env-cmd": "^10.1.0",
     "nodemon": "^2.0.20",
     "rimraf": "^3.0.2",

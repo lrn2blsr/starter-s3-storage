@@ -12,8 +12,8 @@ import { uploadZipToS3 } from './uploadZipToS3'
 
 import { handleDownload } from './handleDownload'
 import path from 'path'
+import { PassThrough } from 'stream'
 
-// const staticFiles = path.join(__dirname, '..', 'build', 'static')
 const staticFiles = path.join(__dirname, 'static')
 
 app.use(express.json())
@@ -26,9 +26,11 @@ app.get('/', (req, res) => {
 app.post('/files', upload.array('newsletter'), async (req, res) => {
   if (!req.files) res.status(400).json({ msg: 'No files uploaded' })
 
+  const throughStream = new PassThrough()
+
   try {
-    await archiveFiles(req.files as Express.Multer.File[])
-    await uploadZipToS3()
+    await archiveFiles(req.files as Express.Multer.File[], throughStream)
+    await uploadZipToS3(throughStream)
     res.status(201).json({ msg: 'Successfully uploaded' })
   } catch (error) {
     res.status(500).json({ msg: 'Something went wrong' })
@@ -38,9 +40,9 @@ app.post('/files', upload.array('newsletter'), async (req, res) => {
 
 app.get('/files', handleDownload)
 
-// app.use('*', (req, res) => {
-//   res.sendStatus(404).end()
-// })
+app.use('*', (req, res) => {
+  res.sendStatus(404).end()
+})
 
 const port = process.env.PORT || 8080
 app.listen(port, () => {
