@@ -10,7 +10,7 @@ import { S3 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 
 export async function uploadZipToS3() {
-  const filePath = path.join(__dirname, 'newsletter.zip')
+  const filePath = path.join(__dirname, 'tmp', 'newsletter.zip')
   const stream = createReadStream(filePath)
   const upload = new Upload({
     params: {
