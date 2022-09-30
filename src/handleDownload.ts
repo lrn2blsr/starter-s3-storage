@@ -1,16 +1,16 @@
 import dotenv from 'dotenv'
 dotenv.config()
-import { config } from './config'
-import { S3, _Error } from '@aws-sdk/client-s3'
-import { Request, Response } from 'express'
-import { PassThrough } from 'stream'
 
+import { PassThrough } from 'stream'
+import { Request, Response } from 'express'
+
+import { S3, _Error } from '@aws-sdk/client-s3'
 const s3 = new S3({})
 
 export async function handleDownload(req: Request, res: Response) {
   try {
     let s3File = await s3.getObject({
-      Bucket: config.bucket,
+      Bucket: process.env.BUCKET,
       Key: 'newsletter.zip',
     })
 

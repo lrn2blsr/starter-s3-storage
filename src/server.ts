@@ -1,7 +1,10 @@
 import dotenv from 'dotenv'
 dotenv.config()
 
-import express, { Request, Response } from 'express'
+import path from 'path'
+import { PassThrough } from 'stream'
+
+import express from 'express'
 const app = express()
 
 import multer from 'multer'
@@ -9,10 +12,7 @@ const upload = multer()
 
 import { archiveFiles } from './archiveFiles'
 import { uploadZipToS3 } from './uploadZipToS3'
-
 import { handleDownload } from './handleDownload'
-import path from 'path'
-import { PassThrough } from 'stream'
 
 const staticFiles = path.join(__dirname, 'static')
 

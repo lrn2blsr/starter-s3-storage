@@ -1,8 +1,6 @@
 import dotenv from 'dotenv'
 dotenv.config()
 
-import { config } from './config'
-
 import { S3 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 
@@ -10,7 +8,7 @@ export async function uploadSingleToS3(files: Express.Multer.File[]) {
   for await (let file of files) {
     const upload = new Upload({
       params: {
-        Bucket: config.bucket,
+        Bucket: process.env.BUCKET,
         Key: file.originalname,
         Body: file.buffer,
       },

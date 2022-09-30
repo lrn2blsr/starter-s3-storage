@@ -1,16 +1,15 @@
 import dotenv from 'dotenv'
 dotenv.config()
 
-import { config } from './config'
+import { PassThrough } from 'node:stream'
 
 import { S3 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
-import { PassThrough } from 'node:stream'
 
 export async function uploadZipToS3(throughStream: PassThrough) {
   const upload = new Upload({
     params: {
-      Bucket: config.bucket,
+      Bucket: process.env.BUCKET,
       Key: 'newsletter.zip',
       Body: throughStream,
     },
